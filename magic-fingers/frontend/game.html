@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Magic Fingers – Play!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+
+<!-- ── SCREENS ────────────────────────────────────────────── -->
+
+<!-- MENU SCREEN -->
+<div id="screenMenu" class="screen active">
+  <div class="menu-bg-floats" aria-hidden="true">
+    <span>➕</span><span>✖️</span><span>➖</span>
+    <span>⭐</span><span>🌟</span><span>💫</span>
+  </div>
+  <div class="menu-card">
+    <div class="menu-logo">🖐️<br/><span class="logo-magic">Magic</span> <span class="logo-fingers">Fingers</span></div>
+    <h2>Choose Your Level</h2>
+    <div class="level-grid">
+      <button class="level-btn easy"  onclick="startGame('easy')">
+        <span class="level-icon">🌱</span><span class="level-name">Easy</span>
+        <span class="level-desc">Addition 1 until 5</span>
+      </button>
+      <button class="level-btn medium" onclick="startGame('medium')">
+        <span class="level-icon">🔥</span><span class="level-name">Medium</span>
+        <span class="level-desc">Addition 1 until 10</span>
+      </button>
+      <button class="level-btn hard" onclick="startGame('hard')">
+        <span class="level-icon">💎</span><span class="level-name">Hard</span>
+        <span class="level-desc">Addition & Subtraction</span>
+      </button>
+    </div>
+    <button class="btn-outline" onclick="window.location.href='index.html'">🏠 Back to Home</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screenGame" class="screen">
+  <!-- Header bar -->
+  <header class="game-header">
+    <div class="game-logo" onclick="showMenu()">🖐️ <strong>Magic Fingers</strong></div>
+    <div class="game-stats">
+      <div class="stat"><span class="stat-icon">⭐</span><span>Score</span><strong id="scoreDisplay">0</strong></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-icon">🏆</span><span>Level</span><strong id="levelDisplay">Easy</strong></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-icon">⏱️</span><span>Time</span><strong id="timerDisplay">02:00</strong></div>
+    </div>
+    <div class="header-controls">
+      <button class="icon-btn" id="muteBtn" onclick="toggleMute()" title="Mute">🔊</button>
+      <button class="icon-btn" onclick="showMenu()" title="Pause">⏸️</button>
+    </div>
+  </header>
+
+  <div class="game-body">
+    <!-- LEFT: Camera -->
+    <div class="camera-panel">
+      <div class="camera-label">📷 Your Hand</div>
+      <div class="camera-wrap">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+        <div class="camera-corners"></div>
+        <div id="detectedBadge" class="detected-badge hidden">
+          ✅ Detected: <strong id="detectedNum">—</strong>
+        </div>
+      </div>
+      <div id="camStatus" class="cam-status">Starting camera…</div>
+    </div>
+
+    <!-- CENTER: Question -->
+    <div class="question-panel">
+      <div class="question-badge">Question <span id="qNum">1</span> / <span id="qTotal">10</span></div>
+      <div class="question-card">
+        <p class="question-prompt">How many fingers are needed?</p>
+        <div class="equation" id="equation">
+          <span class="eq-a">—</span>
+          <span class="eq-op">+</span>
+          <span class="eq-b">—</span>
+          <span class="eq-eq">=</span>
+          <span class="eq-q">?</span>
+        </div>
+        <div class="hint-box">
+          💡 Show the correct number of fingers!
+        </div>
+      </div>
+      <div class="mascot" id="mascot">🐒</div>
+    </div>
+
+    <!-- RIGHT: Info -->
+    <div class="info-panel">
+      <div class="info-card how-to">
+        <h4>How to Play</h4>
+        <div class="how-row"><span>🖐️</span><p>Show the number of fingers that matches the answer.</p></div>
+      </div>
+      <div class="info-card feedback-card">
+        <h4>Feedback</h4>
+        <div id="feedback" class="feedback-text">Waiting for your answer…</div>
+        <div class="spinner" id="spinner"></div>
+      </div>
+      <div class="info-card lives-card">
+        <h4>Lives</h4>
+        <div id="livesDisplay" class="lives">❤️ ❤️ ❤️</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="game-footer">
+    <button class="btn-outline sm" onclick="showMenu()">🏠 Home</button>
+    <div class="stars-bar" id="starsBar">
+      <span class="star" id="s1">☆</span>
+      <span class="star" id="s2">☆</span>
+      <span class="star" id="s3">☆</span>
+      <span class="star" id="s4">☆</span>
+      <span class="star" id="s5">☆</span>
+    </div>
+    <button class="btn-outline sm" id="skipBtn" onclick="skipQuestion()">Skip ⏩</button>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="screenResult" class="screen">
+  <div class="result-card">
+    <div class="result-emoji" id="resultEmoji">🎉</div>
+    <h2 id="resultTitle">Game Over!</h2>
+    <p id="resultMsg">Great job!</p>
+    <div class="result-stats">
+      <div><span>Score</span><strong id="rScore">0</strong></div>
+      <div><span>Correct</span><strong id="rCorrect">0</strong></div>
+      <div><span>Stars</span><strong id="rStars">⭐</strong></div>
+    </div>
+    <div class="save-score">
+      <input type="text" id="playerName" placeholder="Your name" maxlength="20" />
+      <button class="btn-primary" onclick="saveScore()">💾 Save Score</button>
+      <p id="saveMsg" class="save-msg"></p>
+    </div>
+    <div class="result-actions">
+      <button class="btn-primary" onclick="restartGame()">🔄 Play Again</button>
+      <button class="btn-outline"  onclick="window.location.href='index.html'">🏠 Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- MediaPipe CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
